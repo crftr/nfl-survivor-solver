@@ -73,7 +73,7 @@ const getNflStandings = async () => {
   $("table#standings-table > tbody > tr").each((i, teamRow) => {
     const teamWinLoss = $("td.team", teamRow)
       .text()
-      .match(/(\D+)(\d+)-(\d+)/);
+      .match(/(.*\D+)(\d+)-(\d+)/);
     const team = teamWinLoss[1];
     const wins = teamWinLoss[2];
     const losses = teamWinLoss[3];
