@@ -7,7 +7,11 @@ const NFL_GAMES_URL =
 const NFL_STANDINGS_URL =
   "https://projects.fivethirtyeight.com/2021-nfl-predictions/";
 
-const getNflGames = async () => {
+const teamsContainPk = (teams) => teams.find((t) => t.spread === "PK");
+const teamsSpreadMeetsFilter = (teams, spreadMax) =>
+  !teams.find((t) => Number(t.spread) <= spreadMax);
+
+const getNflGames = async (spreadMax = -3) => {
   const response = await fetch(NFL_GAMES_URL);
   const body = await response.text();
 
@@ -23,6 +27,7 @@ const getNflGames = async () => {
     $(".game-body-wrap", weekSection).each((i, game) => {
       const teams = [];
       const metrics = {};
+      let rejectGame = false;
 
       //game-body
       $(".game-body tr.tr", game).each((i, teamNode) => {
@@ -39,6 +44,9 @@ const getNflGames = async () => {
         });
       });
 
+      rejectGame =
+        teamsContainPk(teams) || teamsSpreadMeetsFilter(teams, spreadMax);
+
       //metric-table
       $(".metric-table .metric", game).each((i, metricNode) => {
         const title = $(".title", metricNode).text();
@@ -47,11 +55,13 @@ const getNflGames = async () => {
         metrics[title] = value;
       });
 
-      weekGames.push({
-        weekNumber: weekNumber,
-        teams: teams,
-        metrics: metrics,
-      });
+      if (!rejectGame) {
+        weekGames.push({
+          weekNumber: weekNumber,
+          teams: teams,
+          metrics: metrics,
+        });
+      }
     });
 
     weeks[weekNumber] = {
