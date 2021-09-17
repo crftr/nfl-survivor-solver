@@ -8,7 +8,7 @@ const NFL_STANDINGS_URL =
   "https://projects.fivethirtyeight.com/2021-nfl-predictions/";
 
 const teamsContainPk = (teams) => teams.find((t) => t.spread === "PK");
-const teamsSpreadMeetsFilter = (teams, spreadMax) =>
+const teamsSpreadFilter = (teams, spreadMax) =>
   !teams.find((t) => Number(t.spread) <= spreadMax);
 
 const getNflGames = async (spreadMax = -3) => {
@@ -27,7 +27,9 @@ const getNflGames = async (spreadMax = -3) => {
     $(".game-body-wrap", weekSection).each((i, game) => {
       const teams = [];
       const metrics = {};
+
       let rejectGame = false;
+      const spreadStats = {};
 
       //game-body
       $(".game-body tr.tr", game).each((i, teamNode) => {
@@ -45,7 +47,7 @@ const getNflGames = async (spreadMax = -3) => {
       });
 
       rejectGame =
-        teamsContainPk(teams) || teamsSpreadMeetsFilter(teams, spreadMax);
+        teamsContainPk(teams) || teamsSpreadFilter(teams, spreadMax);
 
       //metric-table
       $(".metric-table .metric", game).each((i, metricNode) => {
@@ -56,10 +58,26 @@ const getNflGames = async (spreadMax = -3) => {
       });
 
       if (!rejectGame) {
+
+        // Summarize the spread for easy-access, later.
+        teams.forEach((t) => {
+          const teamSpread = Number(t.spread);
+
+          if (teamSpread == 0) {
+            spreadStats['loser'] = t.team;
+          } else {
+            spreadStats['winner'] = t.team;
+            spreadStats['spread'] = teamSpread;
+          }
+        })
+
         weekGames.push({
           weekNumber: weekNumber,
+          spread: spreadStats.spread,
+          spreadWinner: spreadStats.winner,
+          spreadLoser: spreadStats.loser,
           teams: teams,
-          metrics: metrics,
+          metrics: metrics
         });
       }
     });
