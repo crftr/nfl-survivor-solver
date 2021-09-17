@@ -106,11 +106,11 @@ const getNflStandings = async () => {
     const wins = teamWinLoss[2];
     const losses = teamWinLoss[3];
 
-    const elo = $("td[data-cell='elo']", teamRow).text();
+    const elo = Number( $("td[data-cell='elo']", teamRow).text() );
     const eloChange = $("td[data-cell='change']", teamRow).text();
     const division = $("td.division", teamRow).text();
     const simRecord = $("td[data-cell='record']", teamRow).text();
-    const simPointDiff = $("td[data-cell='pointdiff']", teamRow).text();
+    const simPointDiff = Number( $("td[data-cell='pointdiff']", teamRow).text() );
     const makePlayOffs = $("td[data-cat='make_playoffs']", teamRow).text();
     const winDivision = $("td[data-cat='win_division']", teamRow).text();
     const firstRoundBye = $("td[data-cat='first_round_bye']", teamRow).text();
