@@ -1,4 +1,5 @@
 import { rankedAndFilteredWinnersByWeek } from "./lib/process-fivethirtyeight.js";
+import { structuredClone } from "./lib/data-utils.js";
 
 /**
  * teamsSelected represents any teams that have been selected in earlier rounds
@@ -7,7 +8,7 @@ import { rankedAndFilteredWinnersByWeek } from "./lib/process-fivethirtyeight.js
  *
  * This array should be empty if we were pre-competition.
  */
-const teamNamesOfSelected = ["Panthers", "Packers"];
+const teamNamesOfSelected = ["Panthers", "Packers", "Ravens"];
 
 const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
 const spreadLookupTable = (() => {
@@ -55,28 +56,15 @@ const maxSpreadSeasonChoices = (arrayOfChoices) => {
   return max;
 };
 
-function generateStates(n, base) {
-  var states = [];
-
-  // Convert to decimal
-  //   var maxDecimal = BigInt(base.toString().repeat(n), base);
-  var maxDecimal = 200;
-
-  // For every number between 0->decimal
-  for (var i = 0n; i <= maxDecimal; i++) {
-    // Convert to binary, pad with 0, and add to final results
-    states.push(i.toString(base).padStart(n, "0"));
-  }
-
-  return states;
-}
-// generateStates(12, 5);
-
 /**
- * Strategy #1
- * - No Brainers: Select teams that rank #1 as weekly winners, once
- * - The Weekly Cream: Only consider the top-5 per week
- * - Brute force the rest
+ * Strategy #1, "The timid puppy" aims to minimize risk.
+ * 
+ * 1. No Brainers: Select teams that, only once, rank #1 as weekly favorites
+ * 2. The Weekly Cream: Only consider the top-5 per week (this is configurable)
+ * 3. Brute force the rest
+ *    - Take on the least risk by optimizing for max-min spread.
+ *    - Sort the options first by max-min delta elo of the teams...
+ *    - ... then second, sort by the max mode of the elos.
  */
 
 const filterForNoBrainers = () => {
@@ -113,52 +101,147 @@ const filterTheWeeklyCream = (creamNum) => {
   });
 };
 
-const bruteForceSolutions = (creamNum) => {
+const bruteForceSolutions = (creamNum, creamSpread) => {
   const weeksToBruteForce = rankedWinners.filter((week) => week.length != 1);
   const weeksToBruteForceNames = weeksToBruteForce.map((week) =>
     week.map((team) => team.team)
   );
   const weeksToBruteForceLength = weeksToBruteForceNames.length;
+  const weeksToBruteForceMapToSeason = weeksToBruteForce.map(
+    (week) => week[0].week
+  );
 
-  let bestMin = 0;
-  let bestMax = 0;
-  const bestChoices = [];
+  const spreadCurrent = (encodedChoice) => {
+    let idxSpread;
+    let spreadMax = -99;
+    for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
+      idxSpread = weeksToBruteForce[idx][encodedChoice[idx]].spread;
+      if (idxSpread > spreadMax) {
+        spreadMax = idxSpread;
+      }
+    }
+    return spreadMax;
+  };
+
+  const eloDeltaCurrent = (encodedChoice) => {
+    let idxEloDelta;
+    const elos = [];
+    for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
+      idxEloDelta = weeksToBruteForce[idx][encodedChoice[idx]].eloDelta;
+      elos.push(idxEloDelta);
+    }
+    elos.sort((a,b) => a-b);
+    return {
+        min: elos[0],
+        max: elos[elos.length - 1],
+        avg: elos.reduce((prev, curr) => prev+curr) / elos.length,
+        mode: elos[Math.round(elos.length / 2)]
+    };
+  };
+
+  const sortEncodedChoicesByEloDelta = (a, b) => {
+      const eloA_min = eloDeltaCurrent(a).min;
+      const eloB_min = eloDeltaCurrent(b).min;
+
+      const eloA_mode = eloDeltaCurrent(a).mode;
+      const eloB_mode = eloDeltaCurrent(b).mode;
+
+      if (eloA_min > eloB_min) return -1;
+      if (eloA_min < eloB_min) return 1;
+
+      if (eloA_mode > eloB_mode) return -1;
+      if (eloA_mode < eloB_mode) return 1;
+
+      return 0;
+  }
 
   /* Let it begin... */
 
   const bfTeams = new Set();
   const currentIsValid = (currentEncodedChoice) => {
-      bfTeams.clear();
-      for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-          if (weeksToBruteForceNames[idx][currentEncodedChoice[idx]]) {
-            bfTeams.add(weeksToBruteForceNames[idx][currentEncodedChoice[idx]])
-          }
+    if (currentEncodedChoice.length != weeksToBruteForceLength) return false;
+    bfTeams.clear();
+    for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
+      if (weeksToBruteForceNames[idx][currentEncodedChoice[idx]]) {
+        bfTeams.add(weeksToBruteForceNames[idx][currentEncodedChoice[idx]]);
       }
-      return bfTeams.size == weeksToBruteForceLength;
+    }
+    return bfTeams.size == weeksToBruteForceLength;
   };
 
-  var maxDecimal = BigInt(creamNum.toString().repeat(weeksToBruteForceLength), creamNum);
-  let current = "";
+  /**
+   * I'm periodically checking the bounds of the for-loop since
+   * BigInt radix parsing seems to be trickier than I have
+   * patience for at the moment. Plus, a few extra loops won't
+   * kill me for this fun project.
+   *
+   * Consider optimizing this later.
+   */
 
-//   /* testing ... currentIsValid */
-//   let tValid = currentIsValid('011210100111');
-//   let tWrong = currentIsValid('001210100111');
-//   console.log('huh');
+  const hist = {};
+  const creamSpreadSolutionsEncoded = {};
 
-  for (var i = 0n; i <= maxDecimal; i = i+1n) {
-    current = i.toString(creamNum).padStart(weeksToBruteForceLength, "0");
+  for (var i = 0n; ; i = i + 1n) {
+    const current = i.toString(creamNum).padStart(weeksToBruteForceLength, "0");
 
     if (currentIsValid(current)) {
-      console.log(current);
-    } else if (i % 50000000n == 0) {
-      console.log('...' + current + ' of ' + maxDecimal)
+      const cVal = spreadCurrent(current);
+
+      if (hist[cVal]) {
+        hist[cVal] += 1;
+      } else {
+        hist[cVal] = 1;
+      }
+
+      if (cVal <= creamSpread) {
+        if (creamSpreadSolutionsEncoded[cVal]) {
+          creamSpreadSolutionsEncoded[cVal].push(current);
+        } else {
+          creamSpreadSolutionsEncoded[cVal] = [current];
+        }
+      }
+    } else if (i % 1000000n == 0) {
+      console.log("... at " + current);
+      if (i.toString(creamNum).length > weeksToBruteForceLength) break;
     }
   }
+
+  const lowestMinSpreadFound = Object.keys(hist).sort().pop();
+  const bestEncodedOptions = creamSpreadSolutionsEncoded[lowestMinSpreadFound];
+  const bestSortedEncodedOptions = bestEncodedOptions.sort(sortEncodedChoicesByEloDelta);
+
+  /* Let's decode our results */
+  const bestSortedOptions = bestSortedEncodedOptions.map((encodedChoice) => {
+    const teamNames = [];
+    for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
+        teamNames.push(weeksToBruteForce[idx][encodedChoice[idx]].team);
+    }
+    return teamNames;
+  });
+
+  const rankedSolutions = bestSortedOptions.map(seasonChoices => {
+      const template = structuredClone(rankedWinners);
+      Object.values(weeksToBruteForceMapToSeason).forEach((bruteForcedWeek, idx) => {
+          template[bruteForcedWeek - 1] = template[bruteForcedWeek - 1].filter(team => {
+              return team.team == seasonChoices[idx];
+          })
+      });
+      return template;
+  })
+
+  return rankedSolutions;
 };
 
-const creamNum = 5;
+const creamNum = 4;
+const creamSpread = -6;
 filterForNoBrainers();
 filterTheWeeklyCream(creamNum);
-bruteForceSolutions(creamNum);
+const rankedSolutions = bruteForceSolutions(creamNum, creamSpread);
 
-console.log("Done!");
+rankedSolutions.forEach((solution, sIdx) => {
+    console.log( 'Solution #' + (sIdx+1) + ' ------------------');
+    
+    solution.forEach((week, wIdx) => {
+        console.log( '  wk' + (wIdx+1) + ' ' + JSON.stringify(week));
+    })
+}) 
