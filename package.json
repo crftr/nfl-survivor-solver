@@ -1,9 +1,9 @@
 {
-  "name": "last-man-standing",
-  "version": "1.0.0",
+  "name": "nfl-survivor-solver",
+  "version": "0.0.1",
   "type": "module",
   "description": "",
-  "main": "last-man.js",
+  "main": "index.js",
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
     "node-fetch": "^3.0.0"
@@ -13,6 +13,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Mike Herrera",
+  "license": "GPL-3.0-only"
 }
