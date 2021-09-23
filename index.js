@@ -11,54 +11,10 @@ import { structuredClone } from "./lib/data-utils.js";
 const teamNamesOfSelected = ["Panthers", "Packers", "Ravens"];
 
 const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
-const spreadLookupTable = (() => {
-  return rankedWinners.map((weeklyGames) => {
-    const weeklyLookupObj = {};
-    weeklyGames.forEach((game) => {
-      weeklyLookupObj[game.team] = {
-        spread: game.spread,
-      };
-    });
-    return weeklyLookupObj;
-  });
-})();
-const participantLookupTable = (() => {
-  return spreadLookupTable.map((weeklyGamesObj) => {
-    return new Set(Object.keys(weeklyGamesObj));
-  });
-})();
-
-const sumSpreadSeasonChoices = (arrayOfChoices) => {
-  let score = 0;
-  arrayOfChoices.forEach((choice, idx) => {
-    score += spreadLookupTable[idx][choice].spread;
-  });
-  return score;
-};
-
-const minSpreadSeasonChoices = (arrayOfChoices) => {
-  let min = 0;
-  arrayOfChoices.forEach((choice, idx) => {
-    if (min > spreadLookupTable[idx][choice].spread) {
-      min = spreadLookupTable[idx][choice].spread;
-    }
-  });
-  return min;
-};
-
-const maxSpreadSeasonChoices = (arrayOfChoices) => {
-  let max = -99;
-  arrayOfChoices.forEach((choice, idx) => {
-    if (max < spreadLookupTable[idx][choice].spread) {
-      max = spreadLookupTable[idx][choice].spread;
-    }
-  });
-  return max;
-};
 
 /**
  * Strategy #1, "The timid puppy" aims to minimize risk.
- * 
+ *
  * 1. No Brainers: Select teams that, only once, rank #1 as weekly favorites
  * 2. The Weekly Cream: Only consider the top-5 per week (this is configurable)
  * 3. Brute force the rest
@@ -130,30 +86,30 @@ const bruteForceSolutions = (creamNum, creamSpread) => {
       idxEloDelta = weeksToBruteForce[idx][encodedChoice[idx]].eloDelta;
       elos.push(idxEloDelta);
     }
-    elos.sort((a,b) => a-b);
+    elos.sort((a, b) => a - b);
     return {
-        min: elos[0],
-        max: elos[elos.length - 1],
-        avg: elos.reduce((prev, curr) => prev+curr) / elos.length,
-        mode: elos[Math.round(elos.length / 2)]
+      min: elos[0],
+      max: elos[elos.length - 1],
+      avg: elos.reduce((prev, curr) => prev + curr) / elos.length,
+      mode: elos[Math.round(elos.length / 2)],
     };
   };
 
   const sortEncodedChoicesByEloDelta = (a, b) => {
-      const eloA_min = eloDeltaCurrent(a).min;
-      const eloB_min = eloDeltaCurrent(b).min;
+    const eloA_min = eloDeltaCurrent(a).min;
+    const eloB_min = eloDeltaCurrent(b).min;
 
-      const eloA_mode = eloDeltaCurrent(a).mode;
-      const eloB_mode = eloDeltaCurrent(b).mode;
+    const eloA_mode = eloDeltaCurrent(a).mode;
+    const eloB_mode = eloDeltaCurrent(b).mode;
 
-      if (eloA_min > eloB_min) return -1;
-      if (eloA_min < eloB_min) return 1;
+    if (eloA_min > eloB_min) return -1;
+    if (eloA_min < eloB_min) return 1;
 
-      if (eloA_mode > eloB_mode) return -1;
-      if (eloA_mode < eloB_mode) return 1;
+    if (eloA_mode > eloB_mode) return -1;
+    if (eloA_mode < eloB_mode) return 1;
 
-      return 0;
-  }
+    return 0;
+  };
 
   /* Let it begin... */
 
@@ -201,47 +157,50 @@ const bruteForceSolutions = (creamNum, creamSpread) => {
         }
       }
     } else if (i % 1000000n == 0) {
-      console.log("... at " + current);
+      console.log("... brute force iteration " + current);
       if (i.toString(creamNum).length > weeksToBruteForceLength) break;
     }
   }
 
   const lowestMinSpreadFound = Object.keys(hist).sort().pop();
   const bestEncodedOptions = creamSpreadSolutionsEncoded[lowestMinSpreadFound];
-  const bestSortedEncodedOptions = bestEncodedOptions.sort(sortEncodedChoicesByEloDelta);
+  const bestSortedEncodedOptions = bestEncodedOptions.sort(
+    sortEncodedChoicesByEloDelta
+  );
 
   /* Let's decode our results */
   const bestSortedOptions = bestSortedEncodedOptions.map((encodedChoice) => {
     const teamNames = [];
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-        teamNames.push(weeksToBruteForce[idx][encodedChoice[idx]].team);
+      teamNames.push(weeksToBruteForce[idx][encodedChoice[idx]].team);
     }
     return teamNames;
   });
 
-  const rankedSolutions = bestSortedOptions.map(seasonChoices => {
-      const template = structuredClone(rankedWinners);
-      Object.values(weeksToBruteForceMapToSeason).forEach((bruteForcedWeek, idx) => {
-          template[bruteForcedWeek - 1] = template[bruteForcedWeek - 1].filter(team => {
-              return team.team == seasonChoices[idx];
-          })
-      });
-      return template;
-  })
+  const rankedSolutions = bestSortedOptions.map((seasonChoices) => {
+    const template = structuredClone(rankedWinners);
+    Object.values(weeksToBruteForceMapToSeason).forEach(
+      (bruteForcedWeek, idx) => {
+        template[bruteForcedWeek - 1] = template[bruteForcedWeek - 1].filter(
+          (team) => {
+            return team.team == seasonChoices[idx];
+          }
+        );
+      }
+    );
+    return template;
+  });
 
   return rankedSolutions;
 };
 
-const creamNum = 4;
-const creamSpread = -6;
+const creamNum = 5;
+const creamSpread = -5.5;
 filterForNoBrainers();
 filterTheWeeklyCream(creamNum);
 const rankedSolutions = bruteForceSolutions(creamNum, creamSpread);
 
 rankedSolutions.forEach((solution, sIdx) => {
-    console.log( 'Solution #' + (sIdx+1) + ' ------------------');
-    
-    solution.forEach((week, wIdx) => {
-        console.log( '  wk' + (wIdx+1) + ' ' + JSON.stringify(week));
-    })
-}) 
+  console.log("\n\nSolution #" + (sIdx + 1) + " ------------------");
+  console.table(solution.flat());
+});
