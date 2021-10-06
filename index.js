@@ -1,5 +1,5 @@
 import { rankedAndFilteredWinnersByWeek } from "./lib/process-fivethirtyeight.js";
-import { structuredClone } from "./lib/data-utils.js";
+import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
 
 /**
  * teamsSelected represents any teams that have been selected in earlier rounds
@@ -8,7 +8,7 @@ import { structuredClone } from "./lib/data-utils.js";
  *
  * This array should be empty if we were pre-competition.
  */
-const teamNamesOfSelected = ["Panthers", "Packers", "Ravens"];
+const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings"];
 
 const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
 
@@ -51,13 +51,7 @@ const filterForNoBrainers = () => {
   });
 };
 
-const filterTheWeeklyCream = (creamNum) => {
-  rankedWinners.forEach((week, idx) => {
-    rankedWinners[idx] = rankedWinners[idx].slice(0, creamNum);
-  });
-};
-
-const bruteForceSolutions = (creamNum, creamSpread) => {
+const bruteForceSolutions = () => {
   const weeksToBruteForce = rankedWinners.filter((week) => week.length != 1);
   const weeksToBruteForceNames = weeksToBruteForce.map((week) =>
     week.map((team) => team.team)
@@ -80,11 +74,10 @@ const bruteForceSolutions = (creamNum, creamSpread) => {
   };
 
   const eloDeltaCurrent = (encodedChoice) => {
-    let idxEloDelta;
     const elos = [];
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      idxEloDelta = weeksToBruteForce[idx][encodedChoice[idx]].eloDelta;
-      elos.push(idxEloDelta);
+      const team = weeksToBruteForce[idx][encodedChoice[idx]];
+      elos.push(team.eloDelta);
     }
     elos.sort((a, b) => a - b);
     return {
@@ -125,21 +118,13 @@ const bruteForceSolutions = (creamNum, creamSpread) => {
     return bfTeams.size == weeksToBruteForceLength;
   };
 
-  /**
-   * I'm periodically checking the bounds of the for-loop since
-   * BigInt radix parsing seems to be trickier than I have
-   * patience for at the moment. Plus, a few extra loops won't
-   * kill me for this fun project.
-   *
-   * Consider optimizing this later.
-   */
-
+  let i = 0;
   const hist = {};
   const creamSpreadSolutionsEncoded = {};
 
-  for (var i = 0n; ; i = i + 1n) {
-    const current = i.toString(creamNum).padStart(weeksToBruteForceLength, "0");
+  const nuChoices = weeksToBruteForce.map((week) => [...Array(week.length).keys()])
 
+  for (let current of combinationGenerator(nuChoices)) {
     if (currentIsValid(current)) {
       const cVal = spreadCurrent(current);
 
@@ -149,22 +134,26 @@ const bruteForceSolutions = (creamNum, creamSpread) => {
         hist[cVal] = 1;
       }
 
-      if (cVal <= creamSpread) {
-        if (creamSpreadSolutionsEncoded[cVal]) {
-          creamSpreadSolutionsEncoded[cVal].push(current);
-        } else {
-          creamSpreadSolutionsEncoded[cVal] = [current];
-        }
+      if (creamSpreadSolutionsEncoded[cVal]) {
+        creamSpreadSolutionsEncoded[cVal].push(current);
+      } else {
+        creamSpreadSolutionsEncoded[cVal] = [current];
       }
-    } else if (i % 1000000n == 0) {
-      console.log("... brute force iteration " + current);
-      if (i.toString(creamNum).length > weeksToBruteForceLength) break;
     }
+    
+    if (i % 5000000 == 0) {
+      i = 0;
+      console.log("... brute force iteration " + current);
+    }
+    i++;
   }
 
-  const lowestMinSpreadFound = Object.keys(hist).sort().pop();
-  const bestEncodedOptions = creamSpreadSolutionsEncoded[lowestMinSpreadFound];
-  const bestSortedEncodedOptions = bestEncodedOptions.sort(
+  const top3minSpread = Object.keys(hist).sort().slice(-3);
+  const bestEncodedOptions = [];
+  for (let spread of top3minSpread) {
+    bestEncodedOptions.push(creamSpreadSolutionsEncoded[spread])
+  }
+  const bestSortedEncodedOptions = bestEncodedOptions.flat().sort(
     sortEncodedChoicesByEloDelta
   );
 
@@ -194,11 +183,8 @@ const bruteForceSolutions = (creamNum, creamSpread) => {
   return rankedSolutions;
 };
 
-const creamNum = 5;
-const creamSpread = -5.5;
 filterForNoBrainers();
-filterTheWeeklyCream(creamNum);
-const rankedSolutions = bruteForceSolutions(creamNum, creamSpread);
+const rankedSolutions = bruteForceSolutions();
 
 rankedSolutions.forEach((solution, sIdx) => {
   console.log("\n\nSolution #" + (sIdx + 1) + " ------------------");
