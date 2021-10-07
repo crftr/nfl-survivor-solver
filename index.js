@@ -16,8 +16,7 @@ const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
  * Strategy #1, "The timid puppy" aims to minimize risk.
  *
  * 1. No Brainers: Select teams that, only once, rank #1 as weekly favorites
- * 2. The Weekly Cream: Only consider the top-5 per week (this is configurable)
- * 3. Brute force the rest
+ * 2. Brute force the rest
  *    - Take on the least risk by optimizing for max-min spread.
  *    - Sort the options first by max-min delta elo of the teams...
  *    - ... then second, sort by the max mode of the elos.
