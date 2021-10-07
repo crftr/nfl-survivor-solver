@@ -17,7 +17,7 @@ const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
  *
  * 1. No Brainers: Select teams that, only once, rank #1 as weekly favorites
  * 2. Brute force the rest
- *    - Take on the least risk by optimizing for max-min spread.
+ *    - Take on the least risk by optimizing for the min-min spread.
  *    - Sort the options first by max-min delta elo of the teams...
  *    - ... then second, sort by the max mode of the elos.
  */
