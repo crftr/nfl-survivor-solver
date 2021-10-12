@@ -8,7 +8,7 @@ import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
  *
  * This array should be empty if we were pre-competition.
  */
-const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings"];
+const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts"];
 
 const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
 
