@@ -1,6 +1,6 @@
 # NFL Survivor Solver
 
-This is a strategy solver for a fantasy-like NFL game I play with my friends and friends-of-friends. The game is also known as _Last Man Standing_.
+This is a strategy solver for a fantasy-like NFL game I play with my friends and friends-of-friends. The game is also known as _Last Man Standing_, _Knockout_, _Eliminator_, _Suicide_, or _King of the Hill_.
 
 ### The rules of the game
 - The game starts at the beginning of the season

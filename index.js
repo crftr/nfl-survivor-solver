@@ -19,7 +19,6 @@ const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
  * 2. Brute force the rest
  *    - Take on the least risk by optimizing for the min-min spread.
  *    - Sort the options first by max-min delta elo of the teams...
- *    - ... then second, sort by the max mode of the elos.
  */
 
 const filterForNoBrainers = () => {
@@ -91,14 +90,8 @@ const bruteForceSolutions = () => {
     const eloA_min = eloDeltaCurrent(a).min;
     const eloB_min = eloDeltaCurrent(b).min;
 
-    const eloA_mode = eloDeltaCurrent(a).mode;
-    const eloB_mode = eloDeltaCurrent(b).mode;
-
     if (eloA_min > eloB_min) return -1;
     if (eloA_min < eloB_min) return 1;
-
-    if (eloA_mode > eloB_mode) return -1;
-    if (eloA_mode < eloB_mode) return 1;
 
     return 0;
   };
