@@ -63,7 +63,7 @@ const bruteForceSolutions = () => {
     let idxSpread;
     let spreadMax = -99;
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      idxSpread = weeksToBruteForce[idx][encodedChoice[idx]].spread;
+      idxSpread = weeksToBruteForce[idx].find((game) => game.team == encodedChoice[idx]).spread
       if (idxSpread > spreadMax) {
         spreadMax = idxSpread;
       }
@@ -74,7 +74,7 @@ const bruteForceSolutions = () => {
   const eloDeltaCurrent = (encodedChoice) => {
     const elos = [];
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      const team = weeksToBruteForce[idx][encodedChoice[idx]];
+      const team = weeksToBruteForce[idx].find((game) => game.team == encodedChoice[idx])
       elos.push(team.eloDelta);
     }
     elos.sort((a, b) => a - b);
@@ -100,21 +100,17 @@ const bruteForceSolutions = () => {
 
   const bfTeams = new Set();
   const currentIsValid = (currentEncodedChoice) => {
-    if (currentEncodedChoice.length != weeksToBruteForceLength) return false;
-    bfTeams.clear();
-    for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      if (weeksToBruteForceNames[idx][currentEncodedChoice[idx]]) {
-        bfTeams.add(weeksToBruteForceNames[idx][currentEncodedChoice[idx]]);
-      }
-    }
-    return bfTeams.size == weeksToBruteForceLength;
+    return (
+      currentEncodedChoice.length == weeksToBruteForceLength &&
+      new Set(currentEncodedChoice).size == weeksToBruteForceLength
+    );
   };
 
   let i = 0;
   const hist = {};
   const creamSpreadSolutionsEncoded = {};
 
-  const nuChoices = weeksToBruteForce.map((week) => [...Array(week.length).keys()])
+  const nuChoices = weeksToBruteForce.map((week) => week.map((game) => game.team));
 
   for (let current of combinationGenerator(nuChoices)) {
     if (currentIsValid(current)) {
@@ -153,7 +149,7 @@ const bruteForceSolutions = () => {
   const bestSortedOptions = bestSortedEncodedOptions.map((encodedChoice) => {
     const teamNames = [];
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      teamNames.push(weeksToBruteForce[idx][encodedChoice[idx]].team);
+      teamNames.push(weeksToBruteForce[idx].find((game) => game.team == encodedChoice[idx]).team);
     }
     return teamNames;
   });
