@@ -4,13 +4,15 @@ import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
 /**
  * teamsSelected represents any teams that have been selected in earlier rounds
  * of the competition. When we search for our optimal solution we will ignore
- * these teams.
- *
- * This array should be empty if we were pre-competition.
+ * these teams. This array should be empty if we were pre-competition.
+ * 
+ * skipWeeks will accommodate pools that begin in the middle of the season.
  */
-const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts"];
+// const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
+const teamNamesOfSelected = [];
+const skipWeeks = 6;
 
-const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected);
+const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected).slice(skipWeeks);
 
 /**
  * Strategy #1, "The timid puppy" aims to minimize risk.
@@ -158,7 +160,7 @@ const bruteForceSolutions = () => {
     const template = structuredClone(rankedWinners);
     Object.values(weeksToBruteForceMapToSeason).forEach(
       (bruteForcedWeek, idx) => {
-        template[bruteForcedWeek - 1] = template[bruteForcedWeek - 1].filter(
+        template[bruteForcedWeek - skipWeeks - 1] = template[bruteForcedWeek - skipWeeks - 1].filter(
           (team) => {
             return team.team == seasonChoices[idx];
           }
