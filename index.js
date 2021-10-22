@@ -8,9 +8,12 @@ import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
  * 
  * skipWeeks will accommodate pools that begin in the middle of the season.
  */
-// const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
-const teamNamesOfSelected = [];
-const skipWeeks = 6;
+
+const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
+const skipWeeks = 0;
+
+// const teamNamesOfSelected = [];
+// const skipWeeks = 6;
 
 const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected).slice(skipWeeks);
 
@@ -115,8 +118,11 @@ const bruteForceSolutions = () => {
   const nuChoices = weeksToBruteForce.map((week) => week.map((game) => game.team));
 
   for (let current of combinationGenerator(nuChoices)) {
-    if (currentIsValid(current)) {
-      const cVal = spreadCurrent(current);
+
+    let currentFlattened = current.flat(weeksToBruteForceLength);
+
+    if (currentIsValid(currentFlattened)) {
+      const cVal = spreadCurrent(currentFlattened);
 
       if (hist[cVal]) {
         hist[cVal] += 1;
@@ -125,15 +131,15 @@ const bruteForceSolutions = () => {
       }
 
       if (creamSpreadSolutionsEncoded[cVal]) {
-        creamSpreadSolutionsEncoded[cVal].push(current);
+        creamSpreadSolutionsEncoded[cVal].push(currentFlattened);
       } else {
-        creamSpreadSolutionsEncoded[cVal] = [current];
+        creamSpreadSolutionsEncoded[cVal] = [currentFlattened];
       }
     }
     
     if (i % 5000000 == 0) {
       i = 0;
-      console.log("... brute force iteration " + current);
+      console.log("... brute force iteration " + currentFlattened);
     }
     i++;
   }
