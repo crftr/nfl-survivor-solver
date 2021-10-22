@@ -6,16 +6,16 @@ import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
  * of the competition. When we search for our optimal solution we will ignore
  * these teams. This array should be empty if we were pre-competition.
  * 
- * skipWeeks will accommodate pools that begin in the middle of the season.
+ * startFromWeek will accommodate pools that begin in the middle of the season.
  */
 
 const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
-const skipWeeks = 0;
+const startFromWeek = 1;
 
-// const teamNamesOfSelected = [];
-// const skipWeeks = 6;
+// const teamNamesOfSelected = ["Cardinals"];
+// const startFromWeek = 7;
 
-const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected).slice(skipWeeks);
+const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected, startFromWeek).slice(startFromWeek - 1);
 
 /**
  * Strategy #1, "The timid puppy" aims to minimize risk.
@@ -103,7 +103,6 @@ const bruteForceSolutions = () => {
 
   /* Let it begin... */
 
-  const bfTeams = new Set();
   const currentIsValid = (currentEncodedChoice) => {
     return (
       currentEncodedChoice.length == weeksToBruteForceLength &&
@@ -166,7 +165,7 @@ const bruteForceSolutions = () => {
     const template = structuredClone(rankedWinners);
     Object.values(weeksToBruteForceMapToSeason).forEach(
       (bruteForcedWeek, idx) => {
-        template[bruteForcedWeek - skipWeeks - 1] = template[bruteForcedWeek - skipWeeks - 1].filter(
+        template[bruteForcedWeek - startFromWeek] = template[bruteForcedWeek - startFromWeek].filter(
           (team) => {
             return team.team == seasonChoices[idx];
           }
