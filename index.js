@@ -9,11 +9,11 @@ import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
  * startFromWeek will accommodate pools that begin in the middle of the season.
  */
 
-// const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
-// const startFromWeek = 1;
+const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
+const startFromWeek = 1;
 
-const teamNamesOfSelected = ["Cardinals"];
-const startFromWeek = 7;
+// const teamNamesOfSelected = ["Cardinals"];
+// const startFromWeek = 7;
 
 const rankedWinners = rankedAndFilteredWinnersByWeek(
   teamNamesOfSelected,
@@ -59,10 +59,7 @@ const filterForNoBrainers = () => {
 
 const bruteForceSolutions = () => {
   const weeksToBruteForce = rankedWinners.filter((week) => week.length != 1);
-  const weeksToBruteForceNames = weeksToBruteForce.map((week) =>
-    week.map((team) => team.team)
-  );
-  const weeksToBruteForceLength = weeksToBruteForceNames.length;
+  const weeksToBruteForceLength = weeksToBruteForce.length;
   const weeksToBruteForceMapToSeason = weeksToBruteForce.map(
     (week) => week[0].week
   );
