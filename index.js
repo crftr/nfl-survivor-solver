@@ -5,25 +5,28 @@ import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
  * teamsSelected represents any teams that have been selected in earlier rounds
  * of the competition. When we search for our optimal solution we will ignore
  * these teams. This array should be empty if we were pre-competition.
- * 
+ *
  * startFromWeek will accommodate pools that begin in the middle of the season.
  */
 
-const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
-const startFromWeek = 1;
+// const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots"];
+// const startFromWeek = 1;
 
-// const teamNamesOfSelected = ["Cardinals"];
-// const startFromWeek = 7;
+const teamNamesOfSelected = ["Cardinals"];
+const startFromWeek = 7;
 
-const rankedWinners = rankedAndFilteredWinnersByWeek(teamNamesOfSelected, startFromWeek).slice(startFromWeek - 1);
+const rankedWinners = rankedAndFilteredWinnersByWeek(
+  teamNamesOfSelected,
+  startFromWeek
+).slice(startFromWeek - 1);
 
 /**
  * Strategy #1, "The timid puppy" aims to minimize risk.
  *
- * 1. No Brainers: Select teams that, only once, rank #1 as weekly favorites
+ * 1. No Brainers: Select teams that, only once, rank #1 as a weekly favorite.
  * 2. Brute force the rest
  *    - Take on the least risk by optimizing for the min-min spread.
- *    - Sort the options first by max-min delta elo of the teams...
+ *    - Sort the options by max-min delta elo of the teams.
  */
 
 const filterForNoBrainers = () => {
@@ -68,7 +71,9 @@ const bruteForceSolutions = () => {
     let idxSpread;
     let spreadMax = -99;
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      idxSpread = weeksToBruteForce[idx].find((game) => game.team == encodedChoice[idx]).spread
+      idxSpread = weeksToBruteForce[idx].find(
+        (game) => game.team == encodedChoice[idx]
+      ).spread;
       if (idxSpread > spreadMax) {
         spreadMax = idxSpread;
       }
@@ -79,7 +84,9 @@ const bruteForceSolutions = () => {
   const eloDeltaCurrent = (encodedChoice) => {
     const elos = [];
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      const team = weeksToBruteForce[idx].find((game) => game.team == encodedChoice[idx])
+      const team = weeksToBruteForce[idx].find(
+        (game) => game.team == encodedChoice[idx]
+      );
       elos.push(team.eloDelta);
     }
     elos.sort((a, b) => a - b);
@@ -91,7 +98,13 @@ const bruteForceSolutions = () => {
     };
   };
 
-  const sortEncodedChoicesByEloDelta = (a, b) => {
+  const sortEncodedChoicesBySpreadThenEloDelta = (a, b) => {
+    const spreadA_min = spreadCurrent(a);
+    const spreadB_min = spreadCurrent(b);
+
+    if (spreadA_min < spreadB_min) return -1;
+    if (spreadA_min > spreadB_min) return 1;
+
     const eloA_min = eloDeltaCurrent(a).min;
     const eloB_min = eloDeltaCurrent(b).min;
 
@@ -114,10 +127,11 @@ const bruteForceSolutions = () => {
   const hist = {};
   const creamSpreadSolutionsEncoded = {};
 
-  const nuChoices = weeksToBruteForce.map((week) => week.map((game) => game.team));
+  const nuChoices = weeksToBruteForce.map((week) =>
+    week.map((game) => game.team)
+  );
 
   for (let current of combinationGenerator(nuChoices)) {
-
     let currentFlattened = current.flat(weeksToBruteForceLength);
 
     if (currentIsValid(currentFlattened)) {
@@ -135,7 +149,7 @@ const bruteForceSolutions = () => {
         creamSpreadSolutionsEncoded[cVal] = [currentFlattened];
       }
     }
-    
+
     if (i % 5000000 == 0) {
       i = 0;
       console.log("... brute force iteration " + currentFlattened);
@@ -146,17 +160,20 @@ const bruteForceSolutions = () => {
   const top3minSpread = Object.keys(hist).sort().slice(-3);
   const bestEncodedOptions = [];
   for (let spread of top3minSpread) {
-    bestEncodedOptions.push(creamSpreadSolutionsEncoded[spread])
+    bestEncodedOptions.push(creamSpreadSolutionsEncoded[spread]);
   }
-  const bestSortedEncodedOptions = bestEncodedOptions.flat().sort(
-    sortEncodedChoicesByEloDelta
-  );
+  const bestSortedEncodedOptions = bestEncodedOptions
+    .flat()
+    .sort(sortEncodedChoicesBySpreadThenEloDelta);
 
   /* Let's decode our results */
   const bestSortedOptions = bestSortedEncodedOptions.map((encodedChoice) => {
     const teamNames = [];
     for (let idx = 0; idx < weeksToBruteForceLength; idx++) {
-      teamNames.push(weeksToBruteForce[idx].find((game) => game.team == encodedChoice[idx]).team);
+      teamNames.push(
+        weeksToBruteForce[idx].find((game) => game.team == encodedChoice[idx])
+          .team
+      );
     }
     return teamNames;
   });
@@ -165,11 +182,11 @@ const bruteForceSolutions = () => {
     const template = structuredClone(rankedWinners);
     Object.values(weeksToBruteForceMapToSeason).forEach(
       (bruteForcedWeek, idx) => {
-        template[bruteForcedWeek - startFromWeek] = template[bruteForcedWeek - startFromWeek].filter(
-          (team) => {
-            return team.team == seasonChoices[idx];
-          }
-        );
+        template[bruteForcedWeek - startFromWeek] = template[
+          bruteForcedWeek - startFromWeek
+        ].filter((team) => {
+          return team.team == seasonChoices[idx];
+        });
       }
     );
     return template;
