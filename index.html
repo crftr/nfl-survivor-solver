@@ -105,16 +105,23 @@
     }
 
     function addTeamToSelectedList(teamName) {
+      if (!teamMayBeSelected(teamName)) { return; }
       const ul = document.getElementById("selected-teams");
       const li = document.createElement("li");
-      li.setAttribute("id", teamName);
+      li.setAttribute("data-name", teamName);
       li.appendChild(document.createTextNode(teamName));
       ul.appendChild(li);
     }
 
+    function teamMayBeSelected(teamName) {
+      const ul = document.getElementById("selected-teams");
+      const match = ul.querySelector(`[data-name="${teamName}"]`);
+      return !match;
+    }
+
   </script>
 
-  <script src="worker.js"></script>
+  <!-- <script src="worker.js"></script> -->
 </body>
 
 </html>
