@@ -12,105 +12,129 @@
   <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+  <style>
+    section#nfl-teams ul,
+    section#selected-team-section ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    section#selected-team-section ul {
+      margin: 1rem 0;
+    }
+
+    li.selected {
+      color: red;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="controls" tabindex="0">
-    <section id="nfl-teams">
-      <ul>
-        <li data-name="Cardinals">Arizona Cardinals</li>
-        <li data-name="Falcons">Atlanta Falcons</li>
-        <li data-name="Ravens">Baltimore Ravens</li>
-        <li data-name="Bills">Buffalo Bills</li>
-        <li data-name="Panthers">Carolina Panthers</li>
-        <li data-name="Bears">Chicago Bears</li>
-        <li data-name="Bengals">Cincinnati Bengals</li>
-        <li data-name="Browns">Cleveland Browns</li>
-        <li data-name="Cowboys">Dallas Cowboys</li>
-        <li data-name="Broncos">Denver Broncos</li>
-        <li data-name="Lions">Detroit Lions</li>
-        <li data-name="Packers">Green Bay Packers</li>
-        <li data-name="Texans">Houston Texans</li>
-        <li data-name="Colts">Indianapolis Colts</li>
-        <li data-name="Jaguars">Jacksonville Jaguars</li>
-        <li data-name="Chiefs">Kansas City Chiefs</li>
-        <li data-name="Raiders">Las Vegas Raiders</li>
-        <li data-name="Chargers">Los Angeles Chargers</li>
-        <li data-name="Rams">Los Angeles Rams</li>
-        <li data-name="Dolphins">Miami Dolphins</li>
-        <li data-name="Vikings">Minnesota Vikings</li>
-        <li data-name="Patriots">New England Patriots</li>
-        <li data-name="Saints">New Orleans Saints</li>
-        <li data-name="Giants">New York Giants</li>
-        <li data-name="Jets">New York Jets</li>
-        <li data-name="Eagles">Philadelphia Eagles</li>
-        <li data-name="Steelers">Pittsburgh Steelers</li>
-        <li data-name="49ers">San Francisco 49ers</li>
-        <li data-name="Seahawks">Seattle Seahawks</li>
-        <li data-name="Buccaneers">Tampa Bay Buccaneers</li>
-        <li data-name="Titans">Tennessee Titans</li>
-        <li data-name="Washington">Washington Football Team</li>
-      </ul>
-    </section>
 
-    <section id="selected-team-section">
-      Start from
-      <select id="starting-from-week">
-        <option value="1">Week 1</option>
-        <option value="2">Week 2</option>
-        <option value="3">Week 3</option>
-        <option value="4">Week 4</option>
-        <option value="5">Week 5</option>
-        <option value="6">Week 6</option>
-        <option value="7">Week 7</option>
-        <option value="8">Week 8</option>
-        <option value="9">Week 9</option>
-        <option value="10">Week 10</option>
-        <option value="11">Week 11</option>
-        <option value="12">Week 12</option>
-        <option value="13">Week 13</option>
-        <option value="14">Week 14</option>
-        <option value="15">Week 15</option>
-        <option value="16">Week 16</option>
-        <option value="17">Week 17</option>
-        <option value="18">Week 18</option>
-      </select>
+  <h1>NFL Survivor Solver</h1>
 
-      <ul id="selected-teams">
+  <section id="nfl-teams">
+    <h2>Teams</h2> 
+    <ul>
+      <li data-name="Cardinals">Arizona Cardinals</li>
+      <li data-name="Falcons">Atlanta Falcons</li>
+      <li data-name="Ravens">Baltimore Ravens</li>
+      <li data-name="Bills">Buffalo Bills</li>
+      <li data-name="Panthers">Carolina Panthers</li>
+      <li data-name="Bears">Chicago Bears</li>
+      <li data-name="Bengals">Cincinnati Bengals</li>
+      <li data-name="Browns">Cleveland Browns</li>
+      <li data-name="Cowboys">Dallas Cowboys</li>
+      <li data-name="Broncos">Denver Broncos</li>
+      <li data-name="Lions">Detroit Lions</li>
+      <li data-name="Packers">Green Bay Packers</li>
+      <li data-name="Texans">Houston Texans</li>
+      <li data-name="Colts">Indianapolis Colts</li>
+      <li data-name="Jaguars">Jacksonville Jaguars</li>
+      <li data-name="Chiefs">Kansas City Chiefs</li>
+      <li data-name="Raiders">Las Vegas Raiders</li>
+      <li data-name="Chargers">Los Angeles Chargers</li>
+      <li data-name="Rams">Los Angeles Rams</li>
+      <li data-name="Dolphins">Miami Dolphins</li>
+      <li data-name="Vikings">Minnesota Vikings</li>
+      <li data-name="Patriots">New England Patriots</li>
+      <li data-name="Saints">New Orleans Saints</li>
+      <li data-name="Giants">New York Giants</li>
+      <li data-name="Jets">New York Jets</li>
+      <li data-name="Eagles">Philadelphia Eagles</li>
+      <li data-name="Steelers">Pittsburgh Steelers</li>
+      <li data-name="49ers">San Francisco 49ers</li>
+      <li data-name="Seahawks">Seattle Seahawks</li>
+      <li data-name="Buccaneers">Tampa Bay Buccaneers</li>
+      <li data-name="Titans">Tennessee Titans</li>
+      <li data-name="Washington">Washington Football Team</li>
+    </ul>
+  </section>
 
-      </ul>
-    </section>
+  <section id="selected-team-section">
+    <h2>Selected</h2> 
+    Start from
+    <select id="starting-from-week">
+      <option value="1">Week 1</option>
+      <option value="2">Week 2</option>
+      <option value="3">Week 3</option>
+      <option value="4">Week 4</option>
+      <option value="5">Week 5</option>
+      <option value="6">Week 6</option>
+      <option value="7">Week 7</option>
+      <option value="8">Week 8</option>
+      <option value="9">Week 9</option>
+      <option value="10">Week 10</option>
+      <option value="11">Week 11</option>
+      <option value="12">Week 12</option>
+      <option value="13">Week 13</option>
+      <option value="14">Week 14</option>
+      <option value="15">Week 15</option>
+      <option value="16">Week 16</option>
+      <option value="17">Week 17</option>
+      <option value="18">Week 18</option>
+    </select>
 
-    <form>
-      <div>
-        <label for="number1">Multiply Number 1: </label>
-        <input type="text" id="number1" value="0" />
-      </div>
-      <div>
-        <label for="number2">Multiply number 2: </label>
-        <input type="text" id="number2" value="0" />
-      </div>
-    </form>
+    <ul id="selected-teams"></ul>
 
-    <p class="result">Result: 0</p>
-  </div>
+    <button type="button" id="undo">Undo</button>
+
+  </section>
+
+  <!-- <form>
+    <div>
+      <label for="number1">Multiply Number 1: </label>
+      <input type="text" id="number1" value="0" />
+    </div>
+    <div>
+      <label for="number2">Multiply number 2: </label>
+      <input type="text" id="number2" value="0" />
+    </div>
+  </form> -->
+
+  <!-- <p class="result">Result: 0</p> -->
 
   <script>
 
-    const nflTeams = document.querySelectorAll("#nfl-teams li");
-    for (const nflTeam of nflTeams) {
-      nflTeam.addEventListener('click', function (event) {
-        addTeamToSelectedList(event.target.getAttribute('data-name'))
-      })
-    }
+    /* UTILITY FUNCTIONS */
 
     function addTeamToSelectedList(teamName) {
-      if (!teamMayBeSelected(teamName)) { return; }
       const ul = document.getElementById("selected-teams");
       const li = document.createElement("li");
       li.setAttribute("data-name", teamName);
-      li.appendChild(document.createTextNode(teamName));
+      li.appendChild(document.createTextNode(`Week ${baseWeekNumber() + numberOfSelections()} ${teamName}`));
       ul.appendChild(li);
+    }
+
+    function baseWeekNumber() {
+      return Number(document.querySelector("#starting-from-week").value);
+    }
+
+    function numberOfSelections() {
+      const ul = document.getElementById("selected-teams");
+      return ul.getElementsByTagName("li").length;
     }
 
     function teamMayBeSelected(teamName) {
@@ -118,6 +142,43 @@
       const match = ul.querySelector(`[data-name="${teamName}"]`);
       return !match;
     }
+
+    function toggleTeamAsSelected(teamName) {
+      const ul = document.getElementById("nfl-teams");
+      const match = ul.querySelector(`[data-name="${teamName}"]`);
+      match.classList.toggle('selected');
+    }
+
+    function undoLastSelction() {
+      const ul = document.getElementById("selected-teams");
+      if (ul.lastChild) {
+        const last = ul.removeChild(ul.lastChild);
+        const teamName = last.getAttribute("data-name");
+        toggleTeamAsSelected(teamName);
+      }
+    }
+
+    /* Wire-up eventListeners */
+    const nflTeams = document.querySelectorAll("#nfl-teams li");
+    for (const nflTeam of nflTeams) {
+      nflTeam.addEventListener('click', function (event) {
+        let teamName = event.target.getAttribute('data-name');
+        if (teamMayBeSelected(teamName)) {
+          addTeamToSelectedList(teamName);
+          toggleTeamAsSelected(teamName);
+        }
+      })
+    }
+
+    const startWeekSelector = document.querySelector("select#starting-from-week");
+    startWeekSelector.addEventListener('onselect', function (event) {
+      // ...figure out how to remove all...
+    })
+
+    const undoButton = document.querySelector("button#undo");
+    undoButton.addEventListener('click', function (event) {
+      undoLastSelction();
+    })
 
   </script>
 
