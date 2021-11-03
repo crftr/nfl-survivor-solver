@@ -16,17 +16,6 @@
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.8.0/dist/js/uikit-icons.min.js"></script>
 
   <style>
-    section#nfl-teams ul,
-    section#selected-team-section ul {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    section#selected-team-section ul {
-      margin: 1rem 0;
-    }
-
     li.selected {
       color: red;
     }
@@ -107,6 +96,10 @@
           <ul id="selected-teams" class="uk-list">
           </ul>
 
+          <button type="button" id="calculate" class="uk-button uk-button-primary">
+            Calculate
+          </button>
+
           <button type="button" id="undo" class="uk-button uk-button-default">
             Undo
           </button>
@@ -150,10 +143,6 @@
       ul.appendChild(li);
     }
 
-    function baseWeekNumber() {
-      return Number(document.querySelector("#starting-from-week").value);
-    }
-
     function numberOfSelections() {
       const ul = document.getElementById("selected-teams");
       return ul.getElementsByTagName("li").length + 1;
@@ -189,6 +178,10 @@
     startWeekSelector.addEventListener('change', function (event) {
       undoAll();
     })
+
+    function baseWeekNumber() {
+      return Number(document.querySelector("#starting-from-week").value);
+    }
 
     /* Undo */
 
