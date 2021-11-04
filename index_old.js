@@ -9,10 +9,10 @@ import { combinationGenerator, structuredClone } from "./lib/data/utils.js";
  * startFromWeek will accommodate pools that begin in the middle of the season.
  */
 
-const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots", "Chiefs"];
+const teamNamesOfSelected = ["Panthers", "Packers", "Ravens", "Bengals", "Vikings", "Colts", "Patriots", "Chiefs", "Dolphins"];
 const startFromWeek = 1;
 
-// const teamNamesOfSelected = ["Cardinals", "Chiefs"];
+// const teamNamesOfSelected = ["Cardinals", "Chiefs", "Colts"];
 // const startFromWeek = 7;
 
 const rankedWinners = rankedAndFilteredWinnersByWeek(
