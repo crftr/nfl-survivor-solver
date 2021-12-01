@@ -192,10 +192,22 @@ const bruteForceSolutions = () => {
   return rankedSolutions;
 };
 
-filterForNoBrainers();
-const rankedSolutions = bruteForceSolutions();
 
-rankedSolutions.forEach((solution, sIdx) => {
-  console.log("\n\nSolution #" + (sIdx + 1) + " ------------------");
-  console.table(solution.flat());
-});
+filterForNoBrainers();
+const oneSolution = rankedWinners.every((week) => { return week.length == 1; });
+
+if (oneSolution) {
+  const rankedSolutions = [].concat.apply([], rankedWinners);
+
+  rankedSolutions.forEach((solution, sIdx) => {
+    console.log("\n\nSolution #" + (sIdx + 1) + " ------------------");
+    console.table([solution]);
+  });
+} else {
+  const rankedSolutions = bruteForceSolutions();
+
+  rankedSolutions.forEach((solution, sIdx) => {
+    console.log("\n\nSolution #" + (sIdx + 1) + " ------------------");
+    console.table(solution.flat());
+  });
+}
